@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
-import { CheckCircle, XCircle, Trophy, RefreshCw, ArrowRight, Brain, AlertTriangle, ArrowLeft } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { CheckCircle, XCircle, Trophy, RefreshCw, ArrowRight, Brain, AlertTriangle, ArrowLeft, Loader2 } from 'lucide-react';
 
 interface PsychologyTestProps {
   onBack: () => void;
   onRegister: () => void;
 }
 
-const QUESTIONS = [
+// Master Data Pertanyaan (Total 15)
+const RAW_QUESTIONS = [
   {
     question: "Saat harga mendekati Stop Loss (SL) Anda, apa yang Anda lakukan?",
     options: [
@@ -86,20 +87,97 @@ const QUESTIONS = [
       { text: "Tabungan yang sayang kalau hilang.", score: 1 },
       { text: "Uang dingin (Risk Capital). Saya siap jika uang ini hilang.", score: 2 },
     ]
+  },
+  {
+    question: "Market sedang sideways (datar) berjam-jam. Apa yang Anda lakukan?",
+    options: [
+      { text: "Bosan, lalu memaksa masuk posisi di time frame kecil (M1).", score: 0 },
+      { text: "Mencari pair lain secara acak yang bergerak.", score: 1 },
+      { text: "Sabar menunggu (Wait and See) sampai ada breakout valid.", score: 2 },
+    ]
+  },
+  {
+    question: "Anda melihat teman pamer profit 1000% di grup Telegram. Perasaan Anda?",
+    options: [
+      { text: "Iri dan merasa strategi saya bodoh, lalu ikut copy trade dia.", score: 0 },
+      { text: "Penasaran dan mencoba menaikkan risiko saya.", score: 1 },
+      { text: "Masa bodoh. Setiap trader punya perjalanan dan risk profile sendiri.", score: 2 },
+    ]
+  },
+  {
+    question: "Internet mati saat posisi trading sedang terbuka tanpa TP/SL. Reaksi Anda?",
+    options: [
+      { text: "Panik luar biasa, keringat dingin, marah-marah.", score: 0 },
+      { text: "Berdoa semoga harga sesuai harapan.", score: 1 },
+      { text: "Tenang, karena saya selalu pasang SL/TP di awal entry (Hard Stop).", score: 2 },
+    ]
+  },
+  {
+    question: "Akhir bulan target profit belum tercapai. Anda akan...?",
+    options: [
+      { text: "Trading lebih agresif (Overtrade) untuk mengejar target.", score: 0 },
+      { text: "Sedikit menaikkan lot di trade terakhir.", score: 1 },
+      { text: "Menerima apa adanya. Memaksa pasar = Loss.", score: 2 },
+    ]
+  },
+  {
+    question: "Setelah mendapatkan Big Win (Profit Besar), apa yang Anda lakukan selanjutnya?",
+    options: [
+      { text: "Menaikkan lot 2x lipat karena merasa sedang 'wangi'.", score: 0 },
+      { text: "Langsung withdraw semua profit untuk belanja.", score: 1 },
+      { text: "Tetap disiplin dengan lot standar sesuai plan awal.", score: 2 },
+    ]
   }
 ];
 
+// Helper: Fisher-Yates Shuffle Algorithm
+const shuffleArray = (array: any[]) => {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
+};
+
 export const PsychologyTest: React.FC<PsychologyTestProps> = ({ onBack, onRegister }) => {
+  const [activeQuestions, setActiveQuestions] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Initialize & Shuffle Questions on Mount
+  useEffect(() => {
+    startNewTest();
+  }, []);
+
+  const startNewTest = () => {
+    setLoading(true);
+    // 1. Shuffle options inside each question first
+    const questionsWithShuffledOptions = RAW_QUESTIONS.map(q => ({
+        ...q,
+        options: shuffleArray(q.options)
+    }));
+    // 2. Shuffle the order of questions
+    const finalQuestions = shuffleArray(questionsWithShuffledOptions);
+    
+    setActiveQuestions(finalQuestions);
+    setCurrentIndex(0);
+    setScore(0);
+    setIsFinished(false);
+    setSelectedOption(null);
+    
+    // Simulate slight loading delay for effect
+    setTimeout(() => setLoading(false), 500);
+  };
 
   const handleAnswer = (points: number) => {
     setSelectedOption(points); // Visual feedback only
     setTimeout(() => {
         const newScore = score + points;
-        if (currentIndex < QUESTIONS.length - 1) {
+        if (currentIndex < activeQuestions.length - 1) {
             setScore(newScore);
             setCurrentIndex(currentIndex + 1);
             setSelectedOption(null);
@@ -107,19 +185,24 @@ export const PsychologyTest: React.FC<PsychologyTestProps> = ({ onBack, onRegist
             setScore(newScore);
             setIsFinished(true);
         }
-    }, 400);
+    }, 400); // Delay for visual feedback
   };
 
-  const resetTest = () => {
-    setCurrentIndex(0);
-    setScore(0);
-    setIsFinished(false);
-    setSelectedOption(null);
-  };
+  // Loading View
+  if (loading) {
+    return (
+        <div className="min-h-screen bg-gray-50 dark:bg-black flex items-center justify-center">
+            <div className="flex flex-col items-center gap-3">
+                <Loader2 className="w-10 h-10 text-primary animate-spin" />
+                <p className="text-slate-500 animate-pulse">Menyiapkan Soal Psikologi...</p>
+            </div>
+        </div>
+    );
+  }
 
   // --- RESULT PAGE ---
   if (isFinished) {
-    const maxScore = QUESTIONS.length * 2;
+    const maxScore = activeQuestions.length * 2;
     const percentage = (score / maxScore) * 100;
     
     // Logic tampilan hasil
@@ -220,10 +303,10 @@ export const PsychologyTest: React.FC<PsychologyTestProps> = ({ onBack, onRegist
                         Buat Akun & Perbaiki Disiplin
                     </button>
                     <button 
-                        onClick={resetTest}
+                        onClick={startNewTest}
                         className="w-full py-4 bg-transparent text-slate-500 hover:text-slate-800 dark:text-zinc-500 dark:hover:text-zinc-300 font-medium flex items-center justify-center gap-2"
                     >
-                        <RefreshCw className="w-4 h-4"/> Ulangi Tes
+                        <RefreshCw className="w-4 h-4"/> Ulangi Tes (Acak Soal)
                     </button>
                     <button onClick={onBack} className="text-sm text-slate-400 hover:underline">
                         Kembali ke Home
@@ -235,7 +318,7 @@ export const PsychologyTest: React.FC<PsychologyTestProps> = ({ onBack, onRegist
   }
 
   // --- QUIZ INTERFACE ---
-  const currentQ = QUESTIONS[currentIndex];
+  const currentQ = activeQuestions[currentIndex];
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-black text-slate-800 dark:text-zinc-200 flex flex-col items-center justify-center p-4 relative overflow-hidden">
@@ -243,24 +326,24 @@ export const PsychologyTest: React.FC<PsychologyTestProps> = ({ onBack, onRegist
         <div className="absolute top-0 left-0 w-full h-2 bg-gray-200 dark:bg-zinc-900">
             <div 
                 className="h-full bg-primary transition-all duration-300 ease-out" 
-                style={{ width: `${((currentIndex) / QUESTIONS.length) * 100}%` }}
+                style={{ width: `${((currentIndex) / activeQuestions.length) * 100}%` }}
             ></div>
         </div>
 
-        <button onClick={onBack} className="absolute top-6 left-6 p-2 bg-white dark:bg-zinc-900 rounded-full shadow-sm hover:shadow-md transition">
+        <button onClick={onBack} className="absolute top-6 left-6 p-2 bg-white dark:bg-zinc-900 rounded-full shadow-sm hover:shadow-md transition z-20">
             <ArrowLeft className="w-5 h-5 text-slate-500" />
         </button>
 
         <div className="max-w-2xl w-full animate-fade-in-up">
             <div className="mb-8">
-                <span className="text-primary font-bold tracking-wider text-sm uppercase">Pertanyaan {currentIndex + 1} dari {QUESTIONS.length}</span>
+                <span className="text-primary font-bold tracking-wider text-sm uppercase">Pertanyaan {currentIndex + 1} dari {activeQuestions.length}</span>
                 <h2 className="text-2xl md:text-3xl font-bold mt-2 leading-tight text-slate-900 dark:text-white">
                     {currentQ.question}
                 </h2>
             </div>
 
             <div className="space-y-4">
-                {currentQ.options.map((opt, idx) => (
+                {currentQ.options.map((opt: any, idx: number) => (
                     <button
                         key={idx}
                         onClick={() => handleAnswer(opt.score)}
