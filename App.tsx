@@ -194,12 +194,18 @@ const App: React.FC = () => {
         {/* User Info & Footer */}
         <div className="p-4 m-4 rounded-2xl bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-700">
           <div className="flex items-center space-x-3 mb-4">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-cyan-400 flex items-center justify-center text-white font-bold shadow-md">
+            {/* Modified Profile Picture: Solid Color */}
+            <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 font-bold shadow-sm">
               {user.email[0].toUpperCase()}
             </div>
             <div className="overflow-hidden">
               <p className="text-sm font-bold text-slate-800 dark:text-white truncate" title={user.email}>{user.email}</p>
-              <p className="text-xs text-slate-500">Modal: ${user.initialBalance}</p>
+              {/* Added User Label */}
+              <div className="flex items-center space-x-2 mt-0.5">
+                <span className="text-[10px] font-semibold text-primary bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-md uppercase tracking-wide">
+                  {user.label || 'TRADER'}
+                </span>
+              </div>
             </div>
           </div>
           <button 

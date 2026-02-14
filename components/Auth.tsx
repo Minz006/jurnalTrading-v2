@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { User } from '../types';
 import { ApiService } from '../services/api';
-import { Lock, Mail, Wallet, Loader2, TrendingUp } from 'lucide-react';
+import { Lock, Mail, Wallet, Loader2, TrendingUp, UserCircle } from 'lucide-react';
 
 interface AuthProps {
   onLogin: (user: User) => void;
@@ -12,6 +12,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [initialBalance, setInitialBalance] = useState('1000');
+  const [label, setLabel] = useState('Trader Forex');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -23,7 +24,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin }) => {
     try {
       let data;
       if (isRegister) {
-        data = await ApiService.register(email, password, initialBalance);
+        data = await ApiService.register(email, password, initialBalance, label);
       } else {
         data = await ApiService.login(email, password);
       }
@@ -94,19 +95,40 @@ export const Auth: React.FC<AuthProps> = ({ onLogin }) => {
           </div>
 
           {isRegister && (
-             <div className="animate-fade-in-up">
-             <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Modal Awal ($)</label>
-             <div className="relative group">
-               <Wallet className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-primary transition-colors" />
-               <input
-                 type="number"
-                 required
-                 min="0"
-                 value={initialBalance}
-                 onChange={(e) => setInitialBalance(e.target.value)}
-                 className="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl py-3 pl-10 pr-4 text-slate-800 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all placeholder:text-slate-400"
-                 placeholder="1000"
-               />
+             <div className="space-y-5 animate-fade-in-up">
+              <div>
+               <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Modal Awal ($)</label>
+               <div className="relative group">
+                 <Wallet className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-primary transition-colors" />
+                 <input
+                   type="number"
+                   required
+                   min="0"
+                   value={initialBalance}
+                   onChange={(e) => setInitialBalance(e.target.value)}
+                   className="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl py-3 pl-10 pr-4 text-slate-800 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all placeholder:text-slate-400"
+                   placeholder="1000"
+                 />
+               </div>
+             </div>
+
+             <div>
+               <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Tipe Trader</label>
+               <div className="relative group">
+                 <UserCircle className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-primary transition-colors" />
+                 <select
+                   value={label}
+                   onChange={(e) => setLabel(e.target.value)}
+                   className="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl py-3 pl-10 pr-4 text-slate-800 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all appearance-none cursor-pointer"
+                 >
+                   <option value="Trader Forex">Trader Forex</option>
+                   <option value="Investor Saham">Investor Saham</option>
+                   <option value="Crypto Trader">Crypto Trader</option>
+                   <option value="Gold Trader">Gold Trader</option>
+                   <option value="Scalper">Scalper</option>
+                   <option value="Swing Trader">Swing Trader</option>
+                 </select>
+               </div>
              </div>
            </div>
           )}

@@ -14,6 +14,7 @@ export interface User {
   email: string;
   initialBalance: number;
   isLoggedIn: boolean;
+  label?: string; // e.g., "Trader Forex", "Investor Saham"
 }
 
 export interface Statistics {

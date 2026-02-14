@@ -24,11 +24,11 @@ export const ApiService = {
     return data;
   },
 
-  register: async (email: string, password: string, initialBalance: string): Promise<{user: User, token: string}> => {
+  register: async (email: string, password: string, initialBalance: string, label: string): Promise<{user: User, token: string}> => {
     const res = await fetch(`${API_URL}/auth?action=register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, initialBalance })
+      body: JSON.stringify({ email, password, initialBalance, label })
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Registration failed');

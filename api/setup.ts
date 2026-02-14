@@ -2,16 +2,27 @@ import { sql } from '@vercel/postgres';
 
 export default async function handler(req, res) {
   try {
-    // Create Users Table
+    // Create Users Table with label column
+    // Note: If table exists, this won't add the column automatically in SQL.
+    // In a real migration, we would use ALTER TABLE.
     await sql`
       CREATE TABLE IF NOT EXISTS users (
         id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
         email VARCHAR(255) NOT NULL UNIQUE,
         password VARCHAR(255) NOT NULL,
         initial_balance DECIMAL(10, 2) NOT NULL DEFAULT 0,
+        label VARCHAR(50) DEFAULT 'Trader',
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
     `;
+
+    // Try to add column if it doesn't exist (Simple migration attempt for existing DBs)
+    try {
+      await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS label VARCHAR(50) DEFAULT 'Trader';`;
+    } catch (e) {
+      // Ignore if column exists or not supported in specific version
+      console.log('Column migration check skipped or failed', e);
+    }
 
     // Create Trades Table
     await sql`

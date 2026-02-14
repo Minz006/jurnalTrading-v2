@@ -28,7 +28,7 @@ export default async function handler(req, res) {
 
     // Safety check for body parsing
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-    const { email, password, initialBalance } = body;
+    const { email, password, initialBalance, label } = body;
 
     if (!email || !password) {
       return res.status(400).json({ error: 'Email dan Password wajib diisi' });
@@ -43,11 +43,12 @@ export default async function handler(req, res) {
 
       const hashedPassword = await bcrypt.hash(password, 10);
       const balance = parseFloat(initialBalance) || 0;
+      const userLabel = label || 'Trader';
 
       const result = await sql`
-        INSERT INTO users (email, password, initial_balance)
-        VALUES (${email}, ${hashedPassword}, ${balance})
-        RETURNING id, email, initial_balance;
+        INSERT INTO users (email, password, initial_balance, label)
+        VALUES (${email}, ${hashedPassword}, ${balance}, ${userLabel})
+        RETURNING id, email, initial_balance, label;
       `;
 
       const user = result.rows[0];
@@ -58,6 +59,7 @@ export default async function handler(req, res) {
         user: {
           email: user.email,
           initialBalance: parseFloat(user.initial_balance),
+          label: user.label,
           isLoggedIn: true
         }
       });
@@ -84,6 +86,7 @@ export default async function handler(req, res) {
         user: {
           email: user.email,
           initialBalance: parseFloat(user.initial_balance),
+          label: user.label || 'Trader',
           isLoggedIn: true
         }
       });
