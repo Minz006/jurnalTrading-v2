@@ -2,11 +2,10 @@ import { sql } from '@vercel/postgres';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
-// Secret key for JWT (Should be in env vars, but using fallback for demo)
 const JWT_SECRET = process.env.JWT_SECRET || 'rahasia-trading-pro-minz';
 
 export default async function handler(req, res) {
-  // Enable CORS
+  // CORS Headers
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
@@ -20,14 +19,20 @@ export default async function handler(req, res) {
     return;
   }
 
-  const { action } = req.query; // ?action=login or ?action=register
+  const { action } = req.query;
 
   try {
     if (req.method !== 'POST') {
       return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const { email, password, initialBalance } = req.body;
+    // Safety check for body parsing
+    const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    const { email, password, initialBalance } = body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email dan Password wajib diisi' });
+    }
 
     if (action === 'register') {
       // Check if user exists
@@ -87,7 +92,11 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid action' });
 
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    console.error('Auth Error:', error);
+    // Return specific error if table doesn't exist to help debug
+    if (error.message && error.message.includes('does not exist')) {
+      return res.status(500).json({ error: 'Database belum disetup. Silakan buka /api/setup' });
+    }
+    return res.status(500).json({ error: 'Internal Server Error: ' + error.message });
   }
 }

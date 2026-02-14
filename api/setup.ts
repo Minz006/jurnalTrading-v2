@@ -1,10 +1,6 @@
 import { sql } from '@vercel/postgres';
 
-export const config = {
-  runtime: 'edge',
-};
-
-export default async function handler(req: Request) {
+export default async function handler(req, res) {
   try {
     // Create Users Table
     await sql`
@@ -32,14 +28,9 @@ export default async function handler(req: Request) {
       );
     `;
 
-    return new Response(JSON.stringify({ message: 'Database initialized successfully' }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return res.status(200).json({ message: 'Database initialized successfully' });
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    console.error('Setup Error:', error);
+    return res.status(500).json({ error: error.message });
   }
 }
