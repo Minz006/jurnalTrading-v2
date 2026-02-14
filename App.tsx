@@ -5,7 +5,8 @@ import { Dashboard } from './components/Dashboard';
 import { TradeForm } from './components/TradeForm';
 import { TradeTable } from './components/TradeTable';
 import { ChangePasswordForm } from './components/ChangePasswordForm';
-import { AdminPanel } from './components/AdminPanel'; // Import Admin
+import { AdminPanel } from './components/AdminPanel';
+import { PsychologyTest } from './components/PsychologyTest'; // Import Component
 import { Card } from './components/ui/Card';
 import { ApiService } from './services/api';
 import { StorageService } from './services/storage';
@@ -13,7 +14,7 @@ import { Trade, User, Statistics } from './types';
 import { LayoutGrid, List, LogOut, Wallet, Menu, X, PlusCircle, Trash2, Settings, Lock } from 'lucide-react';
 
 type ViewState = 'dashboard' | 'input' | 'history' | 'settings';
-type AuthView = 'LANDING' | 'LOGIN' | 'REGISTER';
+type AuthView = 'LANDING' | 'LOGIN' | 'REGISTER' | 'PSYCHOLOGY';
 
 const App: React.FC = () => {
   // Simple Router Logic
@@ -28,7 +29,7 @@ const App: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeView, setActiveView] = useState<ViewState>('dashboard');
   
-  // State for Unauthenticated View (Landing or Auth)
+  // State for Unauthenticated View
   const [authView, setAuthView] = useState<AuthView>('LANDING');
 
   // Load User & Trades on Mount
@@ -158,6 +159,9 @@ const App: React.FC = () => {
   if (!user) {
     if (authView === 'LANDING') {
       return <LandingPage onNavigate={(mode) => setAuthView(mode)} />;
+    }
+    if (authView === 'PSYCHOLOGY') {
+        return <PsychologyTest onBack={() => setAuthView('LANDING')} onRegister={() => setAuthView('REGISTER')} />;
     }
     return (
         <Auth 

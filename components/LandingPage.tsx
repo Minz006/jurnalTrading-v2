@@ -1,8 +1,8 @@
 import React from 'react';
-import { TrendingUp, Shield, BarChart3, ChevronRight, Zap } from 'lucide-react';
+import { TrendingUp, Shield, BarChart3, ChevronRight, Zap, Brain, Check } from 'lucide-react';
 
 interface LandingPageProps {
-  onNavigate: (mode: 'LOGIN' | 'REGISTER') => void;
+  onNavigate: (mode: 'LOGIN' | 'REGISTER' | 'PSYCHOLOGY') => void;
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
@@ -40,7 +40,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </nav>
 
       {/* Hero Section */}
-      <main className="relative z-10 flex-1 flex flex-col justify-center items-center text-center px-4 sm:px-6 lg:px-8 mt-10 mb-20">
+      <main className="relative z-10 flex-1 flex flex-col items-center text-center px-4 sm:px-6 lg:px-8 mt-10 mb-20">
         <div className="animate-fade-in-up max-w-4xl mx-auto">
           <div className="inline-flex items-center space-x-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/50 rounded-full px-3 py-1 mb-8">
             <span className="flex h-2 w-2 rounded-full bg-blue-500 animate-pulse"></span>
@@ -93,12 +93,51 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
             desc="Pantau pertumbuhan akun Anda setiap saat." 
           />
         </div>
+
+        {/* Psychology Test CTA Section */}
+        <div className="mt-32 w-full max-w-5xl animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+          <div className="relative rounded-3xl overflow-hidden bg-slate-900 dark:bg-zinc-900 text-white shadow-2xl">
+            {/* Decorative Background */}
+            <div className="absolute top-0 right-0 w-96 h-96 bg-purple-600/30 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2"></div>
+            
+            <div className="relative z-10 p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8">
+              <div className="flex-1 text-left">
+                <div className="inline-flex items-center space-x-2 bg-white/10 rounded-full px-3 py-1 mb-4">
+                  <Brain className="w-4 h-4 text-purple-300" />
+                  <span className="text-xs font-bold text-purple-200 uppercase">Fitur Baru</span>
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold mb-4">Apakah Psikologi Trading Anda Sudah Matang?</h2>
+                <p className="text-slate-300 text-lg mb-6">
+                  90% trader gagal karena faktor mental, bukan teknik. Ikuti tes singkat ini untuk mengetahui apakah Anda bertipe <span className="text-yellow-400 font-bold">Investor</span> atau <span className="text-red-400 font-bold">Penjudi</span>.
+                </p>
+                <div className="flex flex-wrap gap-4 text-sm text-slate-400 mb-8">
+                    <span className="flex items-center gap-1"><Check className="w-4 h-4 text-green-400"/> 10 Pertanyaan</span>
+                    <span className="flex items-center gap-1"><Check className="w-4 h-4 text-green-400"/> Analisa Skor</span>
+                    <span className="flex items-center gap-1"><Check className="w-4 h-4 text-green-400"/> Gratis</span>
+                </div>
+                <button 
+                  onClick={() => onNavigate('PSYCHOLOGY')}
+                  className="px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 rounded-xl font-bold text-white shadow-lg shadow-purple-500/30 transition-all transform hover:scale-105"
+                >
+                  Cek Mental Trading Saya
+                </button>
+              </div>
+              <div className="flex-1 flex justify-center">
+                 {/* Visual Illustration */}
+                 <div className="w-64 h-64 bg-gradient-to-br from-slate-800 to-black rounded-full border-4 border-slate-700/50 flex items-center justify-center relative shadow-2xl">
+                    <div className="absolute inset-2 border-2 border-dashed border-slate-600/50 rounded-full animate-spin-slow"></div>
+                    <Brain className="w-24 h-24 text-purple-400 drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]" />
+                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </main>
 
       {/* Footer */}
-      <footer className="relative z-10 py-8 text-center border-t border-gray-100 dark:border-zinc-900">
+      <footer className="relative z-10 py-8 text-center border-t border-gray-100 dark:border-zinc-900 mt-12">
         <p className="text-sm font-medium text-slate-400 dark:text-zinc-600">
-          Made in <span className="text-primary font-bold">Amin</span> &copy; {new Date().getFullYear()}
+          dibuat oleh <span className="text-primary font-bold">Amin</span> &copy; {new Date().getFullYear()}
         </p>
       </footer>
     </div>
