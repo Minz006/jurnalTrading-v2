@@ -35,6 +35,17 @@ export const ApiService = {
     return data;
   },
 
+  updateUserProfile: async (initialBalance: number): Promise<{user: Partial<User>}> => {
+    const res = await fetch(`${API_URL}/auth?action=update-profile`, {
+        method: 'PUT',
+        headers: ApiService.getHeaders(),
+        body: JSON.stringify({ initialBalance })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Gagal mengupdate profil');
+    return data;
+  },
+
   forgotPassword: async (email: string): Promise<void> => {
     const res = await fetch(`${API_URL}/auth?action=forgot-password`, {
         method: 'POST',
@@ -137,6 +148,19 @@ export const ApiService = {
           body: JSON.stringify({ userId })
       });
       if (!res.ok) throw new Error('Gagal mengaktifkan user');
+      return res.json();
+  },
+
+  adminUpdateUserLabel: async (token: string, userId: string, label: string) => {
+      const res = await fetch(`${API_URL}/admin?action=update-label`, {
+          method: 'PUT',
+          headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}` 
+            },
+          body: JSON.stringify({ userId, label })
+      });
+      if (!res.ok) throw new Error('Gagal update label');
       return res.json();
   },
 

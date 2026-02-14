@@ -5,13 +5,14 @@ import { Dashboard } from './components/Dashboard';
 import { TradeForm } from './components/TradeForm';
 import { TradeTable } from './components/TradeTable';
 import { ChangePasswordForm } from './components/ChangePasswordForm';
+import { ProfileSettings } from './components/ProfileSettings'; // New Import
 import { AdminPanel } from './components/AdminPanel';
-import { PsychologyTest } from './components/PsychologyTest'; // Import Component
+import { PsychologyTest } from './components/PsychologyTest'; 
 import { Card } from './components/ui/Card';
 import { ApiService } from './services/api';
 import { StorageService } from './services/storage';
 import { Trade, User, Statistics } from './types';
-import { LayoutGrid, List, LogOut, Wallet, Menu, X, PlusCircle, Trash2, Settings, Lock } from 'lucide-react';
+import { LayoutGrid, List, LogOut, Wallet, Menu, X, PlusCircle, Trash2, Settings, Lock, UserCog } from 'lucide-react';
 
 type ViewState = 'dashboard' | 'input' | 'history' | 'settings';
 type AuthView = 'LANDING' | 'LOGIN' | 'REGISTER' | 'PSYCHOLOGY';
@@ -113,7 +114,16 @@ const App: React.FC = () => {
     setUser(null);
     setTrades([]);
     setActiveView('dashboard');
-    setAuthView('LANDING'); // Reset to landing page on logout
+    setAuthView('LANDING'); 
+  };
+  
+  // Handler when user updates their profile (Initial Balance)
+  const handleUpdateProfile = (updatedFields: Partial<User>) => {
+      if (user) {
+          const newUser = { ...user, ...updatedFields };
+          setUser(newUser);
+          StorageService.saveUser(newUser);
+      }
   };
 
   const handleDeleteAccount = async () => {
@@ -138,7 +148,7 @@ const App: React.FC = () => {
       const newTrade = await ApiService.addTrade(payload);
       setTrades([newTrade, ...trades]);
       alert('Trade berhasil disimpan!');
-      setActiveView('dashboard'); // Redirect to dashboard after add
+      setActiveView('dashboard'); 
     } catch (e) {
       alert('Gagal menyimpan trade.');
     }
@@ -199,7 +209,7 @@ const App: React.FC = () => {
           <div className="bg-gradient-to-tr from-primary to-blue-600 p-1.5 rounded-lg">
             <Wallet className="w-5 h-5 text-white" />
           </div>
-          <span className="font-bold text-slate-800 dark:text-white text-lg">Jurnal Pro</span>
+          <span className="font-bold text-slate-800 dark:text-white text-lg">jurnalTrading</span>
         </div>
         <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2 text-slate-500 dark:text-zinc-400 hover:text-primary transition">
           {isSidebarOpen ? <X /> : <Menu />}
@@ -225,7 +235,7 @@ const App: React.FC = () => {
                <Wallet className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-slate-800 dark:text-white leading-none">Jurnal Pro</h1>
+              <h1 className="text-xl font-bold text-slate-800 dark:text-white leading-none">jurnalTrading</h1>
               <p className="text-xs text-slate-400 dark:text-zinc-500 mt-1 font-medium">Trading Dashboard</p>
             </div>
           </div>
@@ -293,7 +303,7 @@ const App: React.FC = () => {
                 {activeView === 'dashboard' && 'Statistik performa trading anda secara realtime.'}
                 {activeView === 'input' && 'Catat rencana dan hasil eksekusi trading anda.'}
                 {activeView === 'history' && 'Daftar lengkap riwayat kemenangan dan kekalahan.'}
-                {activeView === 'settings' && 'Kelola keamanan dan preferensi akun anda.'}
+                {activeView === 'settings' && 'Kelola modal, keamanan, dan preferensi akun anda.'}
               </p>
             </div>
             {/* Theme Toggle Hint (Optional, system auto) */}
@@ -303,7 +313,7 @@ const App: React.FC = () => {
           </div>
           
           {/* View Content */}
-          <div className="animate-fade-in-up">
+          <div className="animate-fade-in-up space-y-8">
             {activeView === 'dashboard' && <Dashboard stats={stats} trades={trades} user={user} />}
             
             {activeView === 'input' && (
@@ -319,23 +329,38 @@ const App: React.FC = () => {
             )}
 
             {activeView === 'settings' && (
-              <Card className="max-w-2xl mx-auto" title="Ubah Kata Sandi">
-                  <div className="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-lg mb-6 flex items-start gap-3 border border-blue-100 dark:border-blue-900/30">
-                      <Lock className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <Card title="Edit Profil">
+                   <div className="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-lg mb-6 flex items-start gap-3 border border-blue-100 dark:border-blue-900/30">
+                      <UserCog className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
                       <div>
-                          <h4 className="text-sm font-bold text-blue-800 dark:text-blue-300 mb-1">Keamanan Akun</h4>
+                          <h4 className="text-sm font-bold text-blue-800 dark:text-blue-300 mb-1">Data Akun</h4>
                           <p className="text-xs text-blue-700 dark:text-blue-400">
-                              Jika Anda baru saja mereset kata sandi melalui Admin (Default: 123456), disarankan untuk segera mengubahnya demi keamanan akun Anda.
+                             Anda dapat mengubah modal awal jika terjadi kesalahan input saat pendaftaran. Label akun hanya dapat diubah oleh Admin.
+                          </p>
+                      </div>
+                   </div>
+                   <ProfileSettings user={user} onUpdateUser={handleUpdateProfile} />
+                </Card>
+
+                <Card title="Ubah Kata Sandi">
+                  <div className="bg-amber-50 dark:bg-amber-900/10 p-4 rounded-lg mb-6 flex items-start gap-3 border border-amber-100 dark:border-amber-900/30">
+                      <Lock className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                      <div>
+                          <h4 className="text-sm font-bold text-amber-800 dark:text-amber-300 mb-1">Keamanan</h4>
+                          <p className="text-xs text-amber-700 dark:text-amber-400">
+                              Jika Anda baru saja mereset kata sandi melalui Admin (Default: 123456), disarankan untuk segera mengubahnya.
                           </p>
                       </div>
                   </div>
                   <ChangePasswordForm />
-              </Card>
+                </Card>
+              </div>
             )}
           </div>
 
           <footer className="mt-12 text-center text-slate-400 dark:text-zinc-600 text-sm pb-8">
-            <p>&copy; {new Date().getFullYear()} Jurnal Trading Pro. Made by Minz.</p>
+            <p>&copy; {new Date().getFullYear()} jurnalTrading. Made by Minz.</p>
           </footer>
         </div>
       </main>

@@ -78,7 +78,14 @@ export default async function handler(req, res) {
       return res.status(200).json({ message: 'User berhasil diaktifkan' });
     }
 
-    // 5. Delete User (Admin Action)
+    // 5. Update User Label
+    if (action === 'update-label' && req.method === 'PUT') {
+      const { userId, label } = req.body;
+      await sql`UPDATE users SET label = ${label} WHERE id = ${userId}`;
+      return res.status(200).json({ message: 'Label user diperbarui' });
+    }
+
+    // 6. Delete User (Admin Action)
     if (action === 'delete' && req.method === 'DELETE') {
       const { id } = req.query;
       

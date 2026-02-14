@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ApiService } from '../services/api';
-import { Shield, Trash2, RefreshCw, LogOut, Loader2, CheckCircle, AlertTriangle, UserCheck } from 'lucide-react';
+import { Shield, Trash2, RefreshCw, LogOut, Loader2, CheckCircle, AlertTriangle, UserCheck, Pencil } from 'lucide-react';
 
 export const AdminPanel: React.FC = () => {
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
@@ -57,6 +57,21 @@ export const AdminPanel: React.FC = () => {
           alert('Gagal mengaktifkan user');
       } finally {
           setActionLoading(null);
+      }
+  };
+  
+  const handleUpdateLabel = async (userId: string, currentLabel: string) => {
+      const newLabel = prompt("Masukkan Label Baru untuk user ini:", currentLabel);
+      if (newLabel && newLabel !== currentLabel) {
+          setActionLoading(userId);
+          try {
+              await ApiService.adminUpdateUserLabel(token, userId, newLabel);
+              fetchUsers(token);
+          } catch (e) {
+              alert('Gagal mengupdate label');
+          } finally {
+              setActionLoading(null);
+          }
       }
   };
 
@@ -142,7 +157,16 @@ export const AdminPanel: React.FC = () => {
                   <tr key={u.id} className="hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors">
                     <td className="p-4">
                       <div className="font-bold text-slate-800 dark:text-white">{u.email}</div>
-                      <div className="text-xs text-primary mt-1">{u.label}</div>
+                      <div className="flex items-center gap-2 mt-1">
+                          <div className="text-xs text-primary">{u.label}</div>
+                          <button 
+                            onClick={() => handleUpdateLabel(u.id, u.label)}
+                            className="text-slate-400 hover:text-white"
+                            title="Edit Label"
+                          >
+                             <Pencil className="w-3 h-3" />
+                          </button>
+                      </div>
                       <div className="text-xs text-slate-400 mt-1">Joined: {new Date(u.created_at).toLocaleDateString()}</div>
                     </td>
                     <td className="p-4 font-mono text-slate-700 dark:text-slate-300">${parseFloat(u.initial_balance).toLocaleString()}</td>

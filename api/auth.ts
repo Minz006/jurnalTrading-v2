@@ -115,6 +115,24 @@ export default async function handler(req, res) {
     const decoded = jwt.verify(token, JWT_SECRET) as any;
     const userId = decoded.userId;
 
+    if (action === 'update-profile' && req.method === 'PUT') {
+        const { initialBalance } = req.body;
+        const balance = parseFloat(initialBalance);
+        
+        if (isNaN(balance) || balance < 0) {
+            return res.status(400).json({ error: 'Modal awal harus angka positif.' });
+        }
+
+        await sql`UPDATE users SET initial_balance = ${balance} WHERE id = ${userId}`;
+        
+        // Return updated user data (minimal)
+        return res.status(200).json({ 
+            success: true, 
+            message: 'Profil diperbarui',
+            user: { initialBalance: balance } 
+        });
+    }
+
     if (action === 'change-password' && req.method === 'POST') {
         const { oldPassword, newPassword } = req.body;
         
