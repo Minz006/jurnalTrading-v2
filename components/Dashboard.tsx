@@ -31,22 +31,19 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, trades, user }) => 
     ...chartData
   ];
 
-  const StatCard = ({ icon: Icon, label, value, subValue, colorClass, bgClass }: any) => (
-    <div className={`relative overflow-hidden rounded-2xl p-6 ${bgClass} shadow-lg transition-transform hover:scale-105 duration-300`}>
-       <div className="absolute right-0 top-0 opacity-10 transform translate-x-2 -translate-y-2">
-         <Icon className="w-24 h-24 text-white" />
-       </div>
-       <div className="relative z-10">
-         <div className="flex items-center space-x-3 mb-2">
-           <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-             <Icon className="w-6 h-6 text-white" />
-           </div>
-           <p className="text-white/80 text-sm font-medium uppercase tracking-wider">{label}</p>
+  const StatCard = ({ icon: Icon, label, value, subValue, iconColorClass, iconBgClass }: any) => (
+    <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 p-6 shadow-sm hover:shadow-lg transition-all duration-300">
+       <div className="flex items-start justify-between">
+         <div>
+           <p className="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase tracking-wider mb-1">{label}</p>
+           <h4 className="text-2xl font-bold text-slate-800 dark:text-white mb-1">{value}</h4>
+           <span className="text-xs font-medium text-slate-400">
+              {subValue}
+           </span>
          </div>
-         <h4 className="text-2xl font-bold text-white mb-1">{value}</h4>
-         <span className={`text-xs font-medium px-2 py-1 rounded-full bg-white/20 text-white backdrop-blur-md`}>
-            {subValue}
-         </span>
+         <div className={`p-3 rounded-xl ${iconBgClass}`}>
+           <Icon className={`w-6 h-6 ${iconColorClass}`} />
+         </div>
        </div>
     </div>
   );
@@ -60,28 +57,32 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, trades, user }) => 
           label="Saldo Saat Ini" 
           value={`$${stats.currentBalance.toFixed(2)}`}
           subValue={`${((stats.totalProfit / user.initialBalance) * 100).toFixed(2)}% ROI`}
-          bgClass="bg-gradient-to-br from-blue-500 to-blue-700"
+          iconColorClass="text-blue-600 dark:text-blue-400"
+          iconBgClass="bg-blue-50 dark:bg-blue-900/20"
         />
         <StatCard 
           icon={Percent} 
           label="Winrate" 
           value={`${stats.winRate.toFixed(1)}%`}
           subValue={`${stats.wins}W - ${stats.losses}L`}
-          bgClass="bg-gradient-to-br from-emerald-500 to-teal-700"
+          iconColorClass="text-emerald-600 dark:text-emerald-400"
+          iconBgClass="bg-emerald-50 dark:bg-emerald-900/20"
         />
         <StatCard 
           icon={Activity} 
           label="Profit Factor" 
           value={stats.profitFactor.toFixed(2)}
           subValue={`${stats.totalTrades} Total Trade`}
-          bgClass="bg-gradient-to-br from-purple-500 to-indigo-700"
+          iconColorClass="text-purple-600 dark:text-purple-400"
+          iconBgClass="bg-purple-50 dark:bg-purple-900/20"
         />
         <StatCard 
           icon={AlertTriangle} 
           label="Max Drawdown" 
           value={`${stats.maxDrawdown.toFixed(2)}%`}
           subValue="Risk Level"
-          bgClass="bg-gradient-to-br from-rose-500 to-pink-700"
+          iconColorClass="text-rose-600 dark:text-rose-400"
+          iconBgClass="bg-rose-50 dark:bg-rose-900/20"
         />
       </div>
 

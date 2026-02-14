@@ -1,15 +1,22 @@
 import { sql } from '@vercel/postgres';
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'rahasia-trading-pro-minz';
 
 // Middleware to verify token
-const verifyToken = (req) => {
+const verifyToken = (req): JwtPayload => {
   const authHeader = req.headers.authorization;
   if (!authHeader) throw new Error('No token provided');
   
   const token = authHeader.split(' ')[1];
-  return jwt.verify(token, JWT_SECRET);
+  const decoded = jwt.verify(token, JWT_SECRET);
+
+  if (typeof decoded === 'string') {
+    throw new Error('Invalid token payload');
+  }
+
+  // Force cast to JwtPayload after check
+  return decoded as JwtPayload;
 };
 
 export default async function handler(req, res) {
@@ -29,7 +36,12 @@ export default async function handler(req, res) {
 
   try {
     const user = verifyToken(req);
+    // Sekarang aman mengakses userId karena tipe sudah dipastikan JwtPayload
     const userId = user.userId;
+
+    if (!userId) {
+       return res.status(401).json({ error: 'Invalid token: missing userId' });
+    }
 
     if (req.method === 'GET') {
       const result = await sql`
@@ -81,7 +93,7 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error(error);
-    if (error.message === 'No token provided' || error.name === 'JsonWebTokenError') {
+    if (error.message === 'No token provided' || error.name === 'JsonWebTokenError' || error.message === 'Invalid token payload') {
        return res.status(401).json({ error: 'Unauthorized' });
     }
     return res.status(500).json({ error: error.message });

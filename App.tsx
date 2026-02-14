@@ -254,7 +254,7 @@ const App: React.FC = () => {
           </div>
 
           <footer className="mt-12 text-center text-slate-400 dark:text-slate-600 text-sm pb-8">
-            <p>&copy; {new Date().getFullYear()} Jurnal Trading Pro. Crafted with ❤️ by Minz.</p>
+            <p>&copy; {new Date().getFullYear()} Jurnal Trading Pro. Made by Minz.</p>
           </footer>
         </div>
       </main>
