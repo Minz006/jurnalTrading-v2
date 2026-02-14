@@ -3,14 +3,15 @@ import { Auth } from './components/Auth';
 import { Dashboard } from './components/Dashboard';
 import { TradeForm } from './components/TradeForm';
 import { TradeTable } from './components/TradeTable';
+import { ChangePasswordForm } from './components/ChangePasswordForm';
 import { AdminPanel } from './components/AdminPanel'; // Import Admin
 import { Card } from './components/ui/Card';
 import { ApiService } from './services/api';
 import { StorageService } from './services/storage';
 import { Trade, User, Statistics } from './types';
-import { LayoutGrid, List, LogOut, Wallet, Menu, X, PlusCircle, Trash2 } from 'lucide-react';
+import { LayoutGrid, List, LogOut, Wallet, Menu, X, PlusCircle, Trash2, Settings, Lock } from 'lucide-react';
 
-type ViewState = 'dashboard' | 'input' | 'history';
+type ViewState = 'dashboard' | 'input' | 'history' | 'settings';
 
 const App: React.FC = () => {
   // Simple Router Logic
@@ -145,7 +146,7 @@ const App: React.FC = () => {
     }
   };
 
-  if (loading) return <div className="min-h-screen bg-gray-50 dark:bg-slate-950 flex items-center justify-center text-primary"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>;
+  if (loading) return <div className="min-h-screen bg-gray-50 dark:bg-black flex items-center justify-center text-primary"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>;
 
   if (!user) return <Auth onLogin={handleLogin} />;
 
@@ -158,38 +159,38 @@ const App: React.FC = () => {
       className={`w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl transition-all duration-200 group ${
         activeView === view 
           ? 'bg-primary text-white shadow-lg shadow-primary/30 transform scale-100' 
-          : 'text-slate-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+          : 'text-slate-600 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-slate-900 dark:hover:text-white'
       }`}
     >
-      <Icon className={`w-5 h-5 ${activeView === view ? 'text-white' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white'}`} />
+      <Icon className={`w-5 h-5 ${activeView === view ? 'text-white' : 'text-slate-400 dark:text-zinc-500 group-hover:text-slate-900 dark:group-hover:text-white'}`} />
       <span className="font-medium">{label}</span>
     </button>
   );
 
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-slate-950 font-sans transition-colors duration-300">
+    <div className="flex min-h-screen bg-gray-50 dark:bg-black font-sans transition-colors duration-300">
       
       {/* Mobile Header */}
-      <div className="md:hidden fixed top-0 w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-800 z-40 flex items-center justify-between p-4 h-16 shadow-sm">
+      <div className="md:hidden fixed top-0 w-full bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-gray-200 dark:border-zinc-800 z-40 flex items-center justify-between p-4 h-16 shadow-sm">
         <div className="flex items-center space-x-2">
           <div className="bg-gradient-to-tr from-primary to-blue-600 p-1.5 rounded-lg">
             <Wallet className="w-5 h-5 text-white" />
           </div>
           <span className="font-bold text-slate-800 dark:text-white text-lg">Jurnal Pro</span>
         </div>
-        <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2 text-slate-500 dark:text-slate-400 hover:text-primary transition">
+        <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2 text-slate-500 dark:text-zinc-400 hover:text-primary transition">
           {isSidebarOpen ? <X /> : <Menu />}
         </button>
       </div>
 
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 md:hidden animate-fade-in" onClick={() => setIsSidebarOpen(false)} />
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden animate-fade-in" onClick={() => setIsSidebarOpen(false)} />
       )}
 
       {/* Sidebar Navigation */}
       <aside className={`
-        fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-slate-800
+        fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-black border-r border-gray-200 dark:border-zinc-800
         transform transition-transform duration-300 ease-in-out flex flex-col shadow-xl md:shadow-none
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         md:translate-x-0 md:static md:h-screen md:sticky md:top-0
@@ -202,7 +203,7 @@ const App: React.FC = () => {
             </div>
             <div>
               <h1 className="text-xl font-bold text-slate-800 dark:text-white leading-none">Jurnal Pro</h1>
-              <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 font-medium">Trading Dashboard</p>
+              <p className="text-xs text-slate-400 dark:text-zinc-500 mt-1 font-medium">Trading Dashboard</p>
             </div>
           </div>
         </div>
@@ -212,13 +213,14 @@ const App: React.FC = () => {
           <NavItem view="dashboard" icon={LayoutGrid} label="Dashboard" />
           <NavItem view="input" icon={PlusCircle} label="Input Trade" />
           <NavItem view="history" icon={List} label="Riwayat Trade" />
+          <NavItem view="settings" icon={Settings} label="Pengaturan" />
         </nav>
 
         {/* User Info & Footer */}
-        <div className="p-4 m-4 rounded-2xl bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-700">
+        <div className="p-4 m-4 rounded-2xl bg-gray-50 dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800">
           <div className="flex items-center space-x-3 mb-4">
             {/* Modified Profile Picture: Solid Color */}
-            <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 font-bold shadow-sm">
+            <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-zinc-700 flex items-center justify-center text-slate-600 dark:text-zinc-300 font-bold shadow-sm">
               {user.email[0].toUpperCase()}
             </div>
             <div className="overflow-hidden">
@@ -235,7 +237,7 @@ const App: React.FC = () => {
           <div className="space-y-2">
             <button 
                 onClick={handleLogout}
-                className="w-full flex items-center justify-center space-x-2 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 py-2 rounded-lg transition-all border border-gray-200 dark:border-slate-600 shadow-sm text-xs font-medium"
+                className="w-full flex items-center justify-center space-x-2 bg-white dark:bg-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-700 text-slate-600 dark:text-zinc-300 py-2 rounded-lg transition-all border border-gray-200 dark:border-zinc-700 shadow-sm text-xs font-medium"
             >
                 <LogOut className="w-3 h-3" />
                 <span>Keluar</span>
@@ -262,15 +264,17 @@ const App: React.FC = () => {
                 {activeView === 'dashboard' && 'Market Overview'}
                 {activeView === 'input' && 'Entry Baru'}
                 {activeView === 'history' && 'Jurnal Transaksi'}
+                {activeView === 'settings' && 'Pengaturan Akun'}
               </h2>
-              <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
+              <p className="text-slate-500 dark:text-zinc-400 text-sm mt-1">
                 {activeView === 'dashboard' && 'Statistik performa trading anda secara realtime.'}
                 {activeView === 'input' && 'Catat rencana dan hasil eksekusi trading anda.'}
                 {activeView === 'history' && 'Daftar lengkap riwayat kemenangan dan kekalahan.'}
+                {activeView === 'settings' && 'Kelola keamanan dan preferensi akun anda.'}
               </p>
             </div>
             {/* Theme Toggle Hint (Optional, system auto) */}
-            <div className="hidden md:block text-xs text-slate-400 bg-white dark:bg-slate-900 px-3 py-1 rounded-full border border-gray-200 dark:border-slate-800">
+            <div className="hidden md:block text-xs text-slate-400 bg-white dark:bg-zinc-900 px-3 py-1 rounded-full border border-gray-200 dark:border-zinc-800">
                Auto Theme
             </div>
           </div>
@@ -290,9 +294,24 @@ const App: React.FC = () => {
                 <TradeTable trades={trades} user={user} onDelete={handleDeleteTrade} />
               </Card>
             )}
+
+            {activeView === 'settings' && (
+              <Card className="max-w-2xl mx-auto" title="Ubah Kata Sandi">
+                  <div className="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-lg mb-6 flex items-start gap-3 border border-blue-100 dark:border-blue-900/30">
+                      <Lock className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+                      <div>
+                          <h4 className="text-sm font-bold text-blue-800 dark:text-blue-300 mb-1">Keamanan Akun</h4>
+                          <p className="text-xs text-blue-700 dark:text-blue-400">
+                              Jika Anda baru saja mereset kata sandi melalui Admin (Default: 123456), disarankan untuk segera mengubahnya demi keamanan akun Anda.
+                          </p>
+                      </div>
+                  </div>
+                  <ChangePasswordForm />
+              </Card>
+            )}
           </div>
 
-          <footer className="mt-12 text-center text-slate-400 dark:text-slate-600 text-sm pb-8">
+          <footer className="mt-12 text-center text-slate-400 dark:text-zinc-600 text-sm pb-8">
             <p>&copy; {new Date().getFullYear()} Jurnal Trading Pro. Made by Minz.</p>
           </footer>
         </div>

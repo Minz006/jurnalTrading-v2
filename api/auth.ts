@@ -81,23 +81,59 @@ export default async function handler(req, res) {
 
     if (action === 'forgot-password' && req.method === 'POST') {
       const { email } = req.body;
-      // Set reset_requested flag to TRUE
+      
+      // Check user existance and current status
+      const existingUser = await sql`SELECT reset_requested FROM users WHERE email = ${email}`;
+      
+      if (existingUser.rows.length === 0) {
+         // Return success even if not found to prevent enumeration, or specific if preferred
+         return res.status(200).json({ message: 'Permintaan diproses.' });
+      }
+
+      if (existingUser.rows[0].reset_requested) {
+         return res.status(400).json({ error: 'Permintaan reset Anda sedang menunggu konfirmasi Admin.' });
+      }
+
       await sql`UPDATE users SET reset_requested = TRUE WHERE email = ${email}`;
-      // Always return success to prevent email enumeration, or specific if needed
       return res.status(200).json({ message: 'Permintaan reset telah dikirim ke Admin.' });
     }
 
     // === PROTECTED ROUTES (Need Token) ===
-    if (action === 'delete-account' && req.method === 'DELETE') {
-        const authHeader = req.headers.authorization;
-        if (!authHeader) throw new Error('No token provided');
-        const token = authHeader.split(' ')[1];
-        const decoded = jwt.verify(token, JWT_SECRET) as any;
+    
+    // Verify token helper for protected routes
+    const authHeader = req.headers.authorization;
+    if (!authHeader) throw new Error('No token provided');
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    const userId = decoded.userId;
 
+    if (action === 'change-password' && req.method === 'POST') {
+        const { oldPassword, newPassword } = req.body;
+        
+        // Get user current password
+        const result = await sql`SELECT password FROM users WHERE id = ${userId}`;
+        if (result.rows.length === 0) throw new Error('User not found');
+        
+        const user = result.rows[0];
+        
+        // Verify old password
+        const isValid = await bcrypt.compare(oldPassword, user.password);
+        if (!isValid) {
+            return res.status(400).json({ error: 'Kata sandi lama salah.' });
+        }
+
+        // Update with new password
+        const newHashedPassword = await bcrypt.hash(newPassword, 10);
+        await sql`UPDATE users SET password = ${newHashedPassword} WHERE id = ${userId}`;
+        
+        return res.status(200).json({ success: true, message: 'Kata sandi berhasil diubah.' });
+    }
+
+    if (action === 'delete-account' && req.method === 'DELETE') {
         // Delete trades first
-        await sql`DELETE FROM trades WHERE user_id = ${decoded.userId}`;
+        await sql`DELETE FROM trades WHERE user_id = ${userId}`;
         // Delete user
-        await sql`DELETE FROM users WHERE id = ${decoded.userId}`;
+        await sql`DELETE FROM users WHERE id = ${userId}`;
 
         return res.status(200).json({ success: true });
     }
@@ -108,6 +144,10 @@ export default async function handler(req, res) {
     console.error('Auth Error:', error);
     if (error.message && error.message.includes('does not exist')) {
       return res.status(500).json({ error: 'Database belum disetup.' });
+    }
+    // Handle specific JWT errors
+    if (error.name === 'JsonWebTokenError' || error.message === 'No token provided') {
+        return res.status(401).json({ error: 'Unauthorized' });
     }
     return res.status(500).json({ error: error.message });
   }

@@ -45,6 +45,16 @@ export const ApiService = {
     if (!res.ok) throw new Error(data.error || 'Failed to request reset');
   },
 
+  changePassword: async (oldPassword: string, newPassword: string): Promise<void> => {
+      const res = await fetch(`${API_URL}/auth?action=change-password`, {
+          method: 'POST',
+          headers: ApiService.getHeaders(),
+          body: JSON.stringify({ oldPassword, newPassword })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Gagal mengubah kata sandi');
+  },
+
   deleteAccount: async (): Promise<void> => {
       const res = await fetch(`${API_URL}/auth?action=delete-account`, {
           method: 'DELETE',
