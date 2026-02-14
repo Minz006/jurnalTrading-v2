@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Auth } from './components/Auth';
+import { LandingPage } from './components/LandingPage';
 import { Dashboard } from './components/Dashboard';
 import { TradeForm } from './components/TradeForm';
 import { TradeTable } from './components/TradeTable';
@@ -12,6 +13,7 @@ import { Trade, User, Statistics } from './types';
 import { LayoutGrid, List, LogOut, Wallet, Menu, X, PlusCircle, Trash2, Settings, Lock } from 'lucide-react';
 
 type ViewState = 'dashboard' | 'input' | 'history' | 'settings';
+type AuthView = 'LANDING' | 'LOGIN' | 'REGISTER';
 
 const App: React.FC = () => {
   // Simple Router Logic
@@ -25,6 +27,9 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeView, setActiveView] = useState<ViewState>('dashboard');
+  
+  // State for Unauthenticated View (Landing or Auth)
+  const [authView, setAuthView] = useState<AuthView>('LANDING');
 
   // Load User & Trades on Mount
   useEffect(() => {
@@ -107,6 +112,7 @@ const App: React.FC = () => {
     setUser(null);
     setTrades([]);
     setActiveView('dashboard');
+    setAuthView('LANDING'); // Reset to landing page on logout
   };
 
   const handleDeleteAccount = async () => {
@@ -148,8 +154,21 @@ const App: React.FC = () => {
 
   if (loading) return <div className="min-h-screen bg-gray-50 dark:bg-black flex items-center justify-center text-primary"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>;
 
-  if (!user) return <Auth onLogin={handleLogin} />;
+  // Unauthenticated State Handling
+  if (!user) {
+    if (authView === 'LANDING') {
+      return <LandingPage onNavigate={(mode) => setAuthView(mode)} />;
+    }
+    return (
+        <Auth 
+            onLogin={handleLogin} 
+            initialMode={authView === 'REGISTER' ? 'REGISTER' : 'LOGIN'}
+            onBack={() => setAuthView('LANDING')}
+        />
+    );
+  }
 
+  // Authenticated User UI (Dashboard)
   const NavItem = ({ view, icon: Icon, label }: { view: ViewState; icon: any; label: string }) => (
     <button
       onClick={() => {

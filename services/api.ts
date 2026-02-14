@@ -24,7 +24,7 @@ export const ApiService = {
     return data;
   },
 
-  register: async (email: string, password: string, initialBalance: string, label: string): Promise<{user: User, token: string}> => {
+  register: async (email: string, password: string, initialBalance: string, label: string): Promise<any> => {
     const res = await fetch(`${API_URL}/auth?action=register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -124,6 +124,19 @@ export const ApiService = {
             },
           body: JSON.stringify({ userId })
       });
+      return res.json();
+  },
+  
+  adminActivateUser: async (token: string, userId: string) => {
+      const res = await fetch(`${API_URL}/admin?action=activate`, {
+          method: 'POST',
+          headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}` 
+            },
+          body: JSON.stringify({ userId })
+      });
+      if (!res.ok) throw new Error('Gagal mengaktifkan user');
       return res.json();
   },
 

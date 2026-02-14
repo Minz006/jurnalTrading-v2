@@ -11,6 +11,7 @@ export default async function handler(req, res) {
         initial_balance DECIMAL(10, 2) NOT NULL DEFAULT 0,
         label VARCHAR(50) DEFAULT 'Trader',
         reset_requested BOOLEAN DEFAULT FALSE,
+        is_active BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
     `;
@@ -23,6 +24,12 @@ export default async function handler(req, res) {
     try {
       await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_requested BOOLEAN DEFAULT FALSE;`;
     } catch (e) { console.log('Reset column exists/error', e); }
+
+    try {
+      await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT FALSE;`;
+      // Optional: Set existing users to active to prevent lockout during update
+      // await sql`UPDATE users SET is_active = TRUE WHERE is_active IS NULL`;
+    } catch (e) { console.log('is_active column exists/error', e); }
 
     // Create Trades Table
     await sql`

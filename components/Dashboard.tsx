@@ -32,15 +32,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, trades, user }) => 
   ];
 
   const StatCard = ({ icon: Icon, label, value, subValue, iconColorClass, iconBgClass }: any) => (
-    <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 p-6 shadow-sm hover:shadow-lg transition-all duration-300">
+    <div className="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 p-6 shadow-sm hover:shadow-lg transition-all duration-300">
        <div className="flex items-start justify-between">
          <div>
-           <p className="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase tracking-wider mb-1">{label}</p>
-           <h4 className="text-2xl font-bold text-slate-800 dark:text-white mb-1">{value}</h4>
+           <p className="text-slate-500 dark:text-zinc-400 text-sm font-medium uppercase tracking-wider mb-1">{label}</p>
+           <h4 className="text-2xl font-bold text-slate-800 dark:text-zinc-100 mb-1">{value}</h4>
            <span className="text-xs font-medium text-slate-400">
               {subValue}
            </span>
          </div>
+         {/* Icon Container: Keep colored in light, but neutral or subtle in dark if desired, keeping color for identity */}
          <div className={`p-3 rounded-xl ${iconBgClass}`}>
            <Icon className={`w-6 h-6 ${iconColorClass}`} />
          </div>
@@ -58,7 +59,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, trades, user }) => 
           value={`$${stats.currentBalance.toFixed(2)}`}
           subValue={`${((stats.totalProfit / user.initialBalance) * 100).toFixed(2)}% ROI`}
           iconColorClass="text-blue-600 dark:text-blue-400"
-          iconBgClass="bg-blue-50 dark:bg-blue-900/20"
+          iconBgClass="bg-blue-50 dark:bg-zinc-800"
         />
         <StatCard 
           icon={Percent} 
@@ -66,7 +67,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, trades, user }) => 
           value={`${stats.winRate.toFixed(1)}%`}
           subValue={`${stats.wins}W - ${stats.losses}L`}
           iconColorClass="text-emerald-600 dark:text-emerald-400"
-          iconBgClass="bg-emerald-50 dark:bg-emerald-900/20"
+          iconBgClass="bg-emerald-50 dark:bg-zinc-800"
         />
         <StatCard 
           icon={Activity} 
@@ -74,7 +75,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, trades, user }) => 
           value={stats.profitFactor.toFixed(2)}
           subValue={`${stats.totalTrades} Total Trade`}
           iconColorClass="text-purple-600 dark:text-purple-400"
-          iconBgClass="bg-purple-50 dark:bg-purple-900/20"
+          iconBgClass="bg-purple-50 dark:bg-zinc-800"
         />
         <StatCard 
           icon={AlertTriangle} 
@@ -82,7 +83,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, trades, user }) => 
           value={`${stats.maxDrawdown.toFixed(2)}%`}
           subValue="Risk Level"
           iconColorClass="text-rose-600 dark:text-rose-400"
-          iconBgClass="bg-rose-50 dark:bg-rose-900/20"
+          iconBgClass="bg-rose-50 dark:bg-zinc-800"
         />
       </div>
 
@@ -103,14 +104,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, trades, user }) => 
                   <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.1} vertical={false} />
                   <XAxis 
                     dataKey="date" 
-                    stroke="#94a3b8" 
+                    stroke="#52525b" 
                     fontSize={12} 
                     tickLine={false} 
                     axisLine={false}
                     tickMargin={10} 
                   />
                   <YAxis 
-                    stroke="#94a3b8" 
+                    stroke="#52525b" 
                     fontSize={12} 
                     tickLine={false} 
                     axisLine={false} 
@@ -118,14 +119,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, trades, user }) => 
                   />
                   <Tooltip 
                     contentStyle={{ 
-                      backgroundColor: 'rgba(30, 41, 59, 0.9)', 
-                      borderColor: '#334155', 
-                      borderRadius: '12px', 
+                      backgroundColor: 'rgba(24, 24, 27, 0.95)', // Zinc-950
+                      borderColor: '#27272a', // Zinc-800
+                      borderRadius: '8px', 
                       color: '#fff',
-                      backdropFilter: 'blur(4px)',
                       boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
                     }}
                     itemStyle={{ color: '#fff' }}
+                    labelStyle={{ color: '#a1a1aa' }} // Zinc-400
                   />
                   <Area 
                     type="monotone" 
@@ -151,10 +152,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, trades, user }) => 
                     <LineChart data={chartData}>
                       <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.1} vertical={false} />
                       <XAxis dataKey="date" hide />
-                      <YAxis stroke="#94a3b8" fontSize={10} axisLine={false} tickLine={false} />
+                      <YAxis stroke="#52525b" fontSize={10} axisLine={false} tickLine={false} />
                       <Tooltip 
                          contentStyle={{ 
-                          backgroundColor: 'rgba(30, 41, 59, 0.9)', 
+                          backgroundColor: 'rgba(24, 24, 27, 0.95)', // Zinc-950 
                           border: 'none', 
                           borderRadius: '8px',
                           color: '#fff' 
@@ -170,7 +171,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, trades, user }) => 
                         animationDuration={1500}
                       />
                       {/* Reference line at 0 */}
-                      <line x1="0" y1="50%" x2="100%" y2="50%" stroke="#64748b" strokeDasharray="3 3" opacity={0.5} /> 
+                      <line x1="0" y1="50%" x2="100%" y2="50%" stroke="#52525b" strokeDasharray="3 3" opacity={0.5} /> 
                     </LineChart>
                   </ResponsiveContainer>
                 ) : (

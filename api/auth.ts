@@ -36,18 +36,16 @@ export default async function handler(req, res) {
       const balance = parseFloat(initialBalance) || 0;
       const userLabel = label || 'Trader';
 
-      const result = await sql`
-        INSERT INTO users (email, password, initial_balance, label)
-        VALUES (${email}, ${hashedPassword}, ${balance}, ${userLabel})
-        RETURNING id, email, initial_balance, label;
+      // Insert user with is_active = FALSE (default)
+      await sql`
+        INSERT INTO users (email, password, initial_balance, label, is_active)
+        VALUES (${email}, ${hashedPassword}, ${balance}, ${userLabel}, FALSE)
       `;
 
-      const user = result.rows[0];
-      const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
-
+      // Do NOT return token. Return message requiring admin approval.
       return res.status(200).json({
-        token,
-        user: { ...user, initialBalance: parseFloat(user.initial_balance), isLoggedIn: true }
+        success: true,
+        message: 'Registrasi berhasil. Harap tunggu konfirmasi Admin agar akun aktif.'
       });
     } 
     
@@ -64,6 +62,11 @@ export default async function handler(req, res) {
 
       if (!validPassword) {
         return res.status(400).json({ error: 'Password salah' });
+      }
+
+      // Check Active Status
+      if (!user.is_active) {
+        return res.status(403).json({ error: 'Akun belum diaktifkan oleh Admin.' });
       }
 
       const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
@@ -83,14 +86,19 @@ export default async function handler(req, res) {
       const { email } = req.body;
       
       // Check user existance and current status
-      const existingUser = await sql`SELECT reset_requested FROM users WHERE email = ${email}`;
+      const existingUser = await sql`SELECT reset_requested, is_active FROM users WHERE email = ${email}`;
       
       if (existingUser.rows.length === 0) {
-         // Return success even if not found to prevent enumeration, or specific if preferred
          return res.status(200).json({ message: 'Permintaan diproses.' });
       }
 
-      if (existingUser.rows[0].reset_requested) {
+      const user = existingUser.rows[0];
+
+      if (!user.is_active) {
+          return res.status(400).json({ error: 'Akun belum aktif, tidak bisa reset password.' });
+      }
+
+      if (user.reset_requested) {
          return res.status(400).json({ error: 'Permintaan reset Anda sedang menunggu konfirmasi Admin.' });
       }
 

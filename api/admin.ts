@@ -50,7 +50,7 @@ export default async function handler(req, res) {
     // 2. Get All Users
     if (req.method === 'GET') {
       const result = await sql`
-        SELECT id, email, initial_balance, label, reset_requested, created_at 
+        SELECT id, email, initial_balance, label, reset_requested, is_active, created_at 
         FROM users 
         ORDER BY created_at DESC
       `;
@@ -65,13 +65,20 @@ export default async function handler(req, res) {
 
       await sql`
         UPDATE users 
-        SET password = ${hashedPassword}, reset_requested = FALSE 
+        SET password = ${hashedPassword}, reset_requested = FALSE, is_active = TRUE 
         WHERE id = ${userId}
       `;
       return res.status(200).json({ message: `Password direset menjadi: ${defaultPassword}` });
     }
 
-    // 4. Delete User (Admin Action)
+    // 4. Activate User
+    if (action === 'activate' && req.method === 'POST') {
+      const { userId } = req.body;
+      await sql`UPDATE users SET is_active = TRUE WHERE id = ${userId}`;
+      return res.status(200).json({ message: 'User berhasil diaktifkan' });
+    }
+
+    // 5. Delete User (Admin Action)
     if (action === 'delete' && req.method === 'DELETE') {
       const { id } = req.query;
       

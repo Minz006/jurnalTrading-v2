@@ -1,16 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User } from '../types';
 import { ApiService } from '../services/api';
-import { Lock, Mail, Wallet, Loader2, TrendingUp, UserCircle, Eye, EyeOff, ArrowLeft, CheckCircle } from 'lucide-react';
+import { Lock, Mail, Wallet, Loader2, TrendingUp, UserCircle, Eye, EyeOff, ArrowLeft, CheckCircle, Info } from 'lucide-react';
 
 interface AuthProps {
   onLogin: (user: User) => void;
+  initialMode?: 'LOGIN' | 'REGISTER';
+  onBack: () => void;
 }
 
 type AuthMode = 'LOGIN' | 'REGISTER' | 'FORGOT_PASSWORD';
 
-export const Auth: React.FC<AuthProps> = ({ onLogin }) => {
-  const [mode, setMode] = useState<AuthMode>('LOGIN');
+export const Auth: React.FC<AuthProps> = ({ onLogin, initialMode = 'LOGIN', onBack }) => {
+  const [mode, setMode] = useState<AuthMode>(initialMode);
+  
+  // Reset mode if initialMode prop changes (e.g. clicking diff buttons on landing)
+  useEffect(() => {
+    setMode(initialMode);
+  }, [initialMode]);
   
   // Form States
   const [email, setEmail] = useState('');
@@ -70,9 +77,9 @@ export const Auth: React.FC<AuthProps> = ({ onLogin }) => {
            throw new Error('Konfirmasi kata sandi tidak cocok.');
         }
 
-        const data = await ApiService.register(email, password, initialBalance, label);
-        ApiService.setToken(data.token);
-        onLogin(data.user);
+        const res = await ApiService.register(email, password, initialBalance, label);
+        setSuccessMsg(res.message || 'Registrasi berhasil.');
+        // Don't auto login, show message instead
       } else {
         // Login Logic
         const data = await ApiService.login(email, password);
@@ -91,18 +98,62 @@ export const Auth: React.FC<AuthProps> = ({ onLogin }) => {
   const isLogin = mode === 'LOGIN';
   const isForgot = mode === 'FORGOT_PASSWORD';
 
+  // If Registration successful, show specific view
+  if (isRegister && successMsg) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black px-4 relative overflow-hidden">
+           <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+                <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/20 rounded-full blur-3xl opacity-50 animate-pulse-slow"></div>
+            </div>
+            <div className="max-w-md w-full bg-white dark:bg-zinc-900 p-8 rounded-2xl shadow-2xl border border-gray-100 dark:border-zinc-800 relative z-10 text-center animate-fade-in-up">
+                <div className="flex justify-center mb-4">
+                    <div className="bg-green-100 dark:bg-green-900/30 p-4 rounded-full">
+                        <CheckCircle className="w-12 h-12 text-green-600 dark:text-green-400" />
+                    </div>
+                </div>
+                <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">Pendaftaran Berhasil</h2>
+                <p className="text-slate-600 dark:text-slate-300 mb-6">
+                    Akun Anda telah dibuat. Demi keamanan, akun Anda memerlukan konfirmasi Admin sebelum dapat digunakan.
+                </p>
+                <div className="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-lg mb-6 text-sm text-blue-700 dark:text-blue-300 flex items-start gap-2 text-left">
+                    <Info className="w-5 h-5 shrink-0 mt-0.5" />
+                    <span>Silakan hubungi Admin untuk mengaktifkan akun Anda agar bisa login.</span>
+                </div>
+                <button
+                    onClick={() => {
+                        setSuccessMsg('');
+                        switchMode('LOGIN');
+                    }}
+                    className="w-full bg-primary hover:bg-blue-600 text-white font-bold py-3 rounded-lg transition"
+                >
+                    Kembali ke Login
+                </button>
+            </div>
+        </div>
+      );
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-950 px-4 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black px-4 relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/20 rounded-full blur-3xl opacity-50 animate-pulse-slow"></div>
         <div className="absolute top-40 -left-20 w-72 h-72 bg-purple-500/20 rounded-full blur-3xl opacity-50 animate-pulse-slow" style={{ animationDelay: '1s' }}></div>
       </div>
 
-      <div className="max-w-md w-full bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-800 relative z-10 animate-fade-in-up">
+      <div className="max-w-md w-full bg-white dark:bg-zinc-900 p-8 rounded-2xl shadow-2xl border border-gray-100 dark:border-zinc-800 relative z-10 animate-fade-in-up">
         
+        {/* Back Button */}
+        <button 
+            onClick={onBack}
+            className="absolute top-6 left-6 text-slate-400 hover:text-primary transition-colors"
+            title="Kembali ke Halaman Utama"
+        >
+            <ArrowLeft className="w-6 h-6" />
+        </button>
+
         {/* Header Section */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 pt-4">
           <div className="inline-flex items-center justify-center p-3 bg-gradient-to-tr from-blue-500 to-cyan-400 rounded-xl mb-4 shadow-lg shadow-blue-500/30">
              <TrendingUp className="w-8 h-8 text-white" />
           </div>
@@ -138,7 +189,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl py-3 pl-10 pr-4 text-slate-800 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all placeholder:text-slate-400"
+                  className="w-full bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl py-3 pl-10 pr-4 text-slate-800 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all placeholder:text-slate-400"
                   placeholder="nama@email.com"
                 />
               </div>
@@ -173,7 +224,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl py-3 pl-10 pr-4 text-slate-800 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all placeholder:text-slate-400"
+                  className="w-full bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl py-3 pl-10 pr-4 text-slate-800 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all placeholder:text-slate-400"
                   placeholder="nama@email.com"
                 />
               </div>
@@ -199,7 +250,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl py-3 pl-10 pr-12 text-slate-800 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all placeholder:text-slate-400"
+                  className="w-full bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl py-3 pl-10 pr-12 text-slate-800 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all placeholder:text-slate-400"
                   placeholder="••••••••"
                 />
                 <button
@@ -225,10 +276,10 @@ export const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                       required
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className={`w-full bg-gray-50 dark:bg-slate-800 border rounded-xl py-3 pl-10 pr-12 text-slate-800 dark:text-white focus:ring-2 outline-none transition-all placeholder:text-slate-400 ${
+                      className={`w-full bg-gray-50 dark:bg-zinc-800 border rounded-xl py-3 pl-10 pr-12 text-slate-800 dark:text-white focus:ring-2 outline-none transition-all placeholder:text-slate-400 ${
                          confirmPassword && password !== confirmPassword 
                          ? 'border-red-500 focus:ring-red-500/50' 
-                         : 'border-gray-200 dark:border-slate-700 focus:ring-primary/50 focus:border-primary'
+                         : 'border-gray-200 dark:border-zinc-700 focus:ring-primary/50 focus:border-primary'
                       }`}
                       placeholder="••••••••"
                     />
@@ -255,7 +306,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                      min="0"
                      value={initialBalance}
                      onChange={(e) => setInitialBalance(e.target.value)}
-                     className="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl py-3 pl-10 pr-4 text-slate-800 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all placeholder:text-slate-400"
+                     className="w-full bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl py-3 pl-10 pr-4 text-slate-800 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all placeholder:text-slate-400"
                      placeholder="1000"
                    />
                  </div>
@@ -268,7 +319,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                    <select
                      value={label}
                      onChange={(e) => setLabel(e.target.value)}
-                     className="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl py-3 pl-10 pr-4 text-slate-800 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all appearance-none cursor-pointer"
+                     className="w-full bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl py-3 pl-10 pr-4 text-slate-800 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all appearance-none cursor-pointer"
                    >
                      <option value="Trader Forex">Trader Forex</option>
                      <option value="Investor Saham">Investor Saham</option>
