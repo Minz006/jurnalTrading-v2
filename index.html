@@ -7,59 +7,76 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
-        darkMode: 'class',
+        darkMode: 'media', // Mengikuti pengaturan sistem (Light/Dark) otomatis
         theme: {
           extend: {
             colors: {
-              background: '#0f172a', // slate-900
-              surface: '#1e293b', // slate-800
-              primary: '#3b82f6', // blue-500
-              success: '#10b981', // emerald-500
-              danger: '#f43f5e', // rose-500
+              primary: '#3b82f6', 
+              success: '#10b981', 
+              danger: '#f43f5e', 
+            },
+            animation: {
+              'fade-in-up': 'fadeInUp 0.5s ease-out forwards',
+              'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            },
+            keyframes: {
+              fadeInUp: {
+                '0%': { opacity: '0', transform: 'translateY(20px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+              }
             }
           }
         }
       }
     </script>
     <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+      
       body {
-        background-color: #0f172a;
-        color: #e2e8f0;
+        font-family: 'Inter', sans-serif;
+        /* Default transition for smooth theme switching */
+        transition: background-color 0.3s ease, color 0.3s ease;
       }
+      
       /* Custom Scrollbar */
       ::-webkit-scrollbar {
         width: 8px;
         height: 8px;
       }
       ::-webkit-scrollbar-track {
-        background: #1e293b; 
+        background: transparent; 
       }
       ::-webkit-scrollbar-thumb {
-        background: #475569; 
+        background: #94a3b8; 
         border-radius: 4px;
       }
       ::-webkit-scrollbar-thumb:hover {
         background: #64748b; 
       }
+      
+      /* Recharts Tooltip Reset */
+      .recharts-tooltip-wrapper {
+        outline: none;
+      }
     </style>
   <script type="importmap">
 {
   "imports": {
-    "react/": "https://esm.sh/react@^19.2.4/",
-    "react": "https://esm.sh/react@^19.2.4",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
-    "lucide-react": "https://esm.sh/lucide-react@^0.564.0",
-    "recharts": "https://esm.sh/recharts@^3.7.0",
-    "@vercel/postgres": "https://esm.sh/@vercel/postgres@^0.10.0",
-    "bcryptjs": "https://esm.sh/bcryptjs@^3.0.3",
-    "jsonwebtoken": "https://esm.sh/jsonwebtoken@^9.0.3",
-    "vite": "https://esm.sh/vite@^7.3.1",
-    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.4"
+    "react/": "https://esm.sh/react@^18.3.1/",
+    "react": "https://esm.sh/react@^18.3.1",
+    "react-dom/": "https://esm.sh/react-dom@^18.3.1/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.344.0",
+    "recharts": "https://esm.sh/recharts@^2.12.2",
+    "@vercel/postgres": "https://esm.sh/@vercel/postgres@^0.7.2",
+    "bcryptjs": "https://esm.sh/bcryptjs@^2.4.3",
+    "jsonwebtoken": "https://esm.sh/jsonwebtoken@^9.0.2",
+    "vite": "https://esm.sh/vite@^5.1.4",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^4.2.1"
   }
 }
 </script>
 </head>
-  <body>
+  <body class="bg-gray-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 selection:bg-primary selection:text-white">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>

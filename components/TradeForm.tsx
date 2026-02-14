@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Trade } from '../types';
-import { PlusCircle, Save } from 'lucide-react';
+import { PlusCircle, Info } from 'lucide-react';
 
 interface TradeFormProps {
   onAddTrade: (trade: Trade) => void;
@@ -36,37 +36,40 @@ export const TradeForm: React.FC<TradeFormProps> = ({ onAddTrade }) => {
     setNotes('');
   };
 
+  const inputClass = "w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-3 text-slate-800 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all placeholder:text-slate-400";
+  const labelClass = "block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2";
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <form onSubmit={handleSubmit} className="space-y-6 animate-fade-in-up">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Pair / Fair Input */}
         <div>
-          <label className="block text-xs font-medium text-slate-400 mb-1">Pair / Fair</label>
+          <label className={labelClass}>Pair / Aset</label>
           <input
             type="text"
             required
             value={pair}
             onChange={(e) => setPair(e.target.value)}
-            placeholder="contoh: XAUUSD"
-            className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white focus:border-primary outline-none"
+            placeholder="XAUUSD"
+            className={inputClass}
           />
         </div>
 
         {/* Type */}
         <div>
-          <label className="block text-xs font-medium text-slate-400 mb-1">Posisi</label>
-          <div className="flex bg-slate-900 rounded border border-slate-700 overflow-hidden">
+          <label className={labelClass}>Posisi</label>
+          <div className="flex bg-gray-100 dark:bg-slate-800 rounded-lg p-1 border border-gray-200 dark:border-slate-700">
             <button
               type="button"
               onClick={() => setType('BUY')}
-              className={`flex-1 py-2 text-sm font-semibold transition ${type === 'BUY' ? 'bg-success text-white' : 'text-slate-400 hover:text-white'}`}
+              className={`flex-1 py-2 text-sm font-bold rounded-md transition-all duration-200 ${type === 'BUY' ? 'bg-success text-white shadow-md' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-200'}`}
             >
               BUY
             </button>
             <button
               type="button"
               onClick={() => setType('SELL')}
-              className={`flex-1 py-2 text-sm font-semibold transition ${type === 'SELL' ? 'bg-danger text-white' : 'text-slate-400 hover:text-white'}`}
+              className={`flex-1 py-2 text-sm font-bold rounded-md transition-all duration-200 ${type === 'SELL' ? 'bg-danger text-white shadow-md' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-200'}`}
             >
               SELL
             </button>
@@ -75,7 +78,7 @@ export const TradeForm: React.FC<TradeFormProps> = ({ onAddTrade }) => {
 
         {/* Lot */}
         <div>
-          <label className="block text-xs font-medium text-slate-400 mb-1">Lot Size</label>
+          <label className={labelClass}>Lot Size</label>
           <input
             type="number"
             step="0.01"
@@ -83,45 +86,50 @@ export const TradeForm: React.FC<TradeFormProps> = ({ onAddTrade }) => {
             value={lot}
             onChange={(e) => setLot(e.target.value)}
             placeholder="0.10"
-            className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white focus:border-primary outline-none"
+            className={inputClass}
           />
         </div>
 
         {/* P/L */}
         <div>
-          <label className="block text-xs font-medium text-slate-400 mb-1">P/L ($)</label>
+          <label className={labelClass}>Profit / Loss ($)</label>
           <input
             type="number"
             step="0.01"
             required
             value={pnl}
             onChange={(e) => setPnl(e.target.value)}
-            placeholder="-50 atau 100"
-            className={`w-full bg-slate-900 border border-slate-700 rounded p-2 focus:border-primary outline-none font-bold ${
-              parseFloat(pnl) > 0 ? 'text-success' : parseFloat(pnl) < 0 ? 'text-danger' : 'text-white'
+            placeholder="-50.00"
+            className={`${inputClass} font-bold ${
+              parseFloat(pnl) > 0 ? 'text-success dark:text-success' : parseFloat(pnl) < 0 ? 'text-danger dark:text-danger' : ''
             }`}
           />
         </div>
       </div>
 
       <div>
-          <label className="block text-xs font-medium text-slate-400 mb-1">Catatan (Opsional)</label>
-          <input
-            type="text"
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="Alasan entry..."
-            className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white focus:border-primary outline-none text-sm"
-          />
+          <label className={labelClass}>Catatan Trade (Opsional)</label>
+          <div className="relative">
+             <Info className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
+             <textarea
+                rows={2}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Analisa: Supply area H4, konfirmasi engulfing..."
+                className={`${inputClass} pl-10 resize-none`}
+             />
+          </div>
       </div>
 
-      <button
-        type="submit"
-        className="w-full md:w-auto flex items-center justify-center space-x-2 bg-primary hover:bg-blue-600 text-white font-bold py-2 px-6 rounded transition"
-      >
-        <PlusCircle className="w-4 h-4" />
-        <span>Tambah Jurnal</span>
-      </button>
+      <div className="flex justify-end pt-2">
+        <button
+          type="submit"
+          className="w-full md:w-auto flex items-center justify-center space-x-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold py-3 px-8 rounded-lg shadow-lg shadow-blue-500/30 transition-all transform active:scale-95"
+        >
+          <PlusCircle className="w-5 h-5" />
+          <span>Simpan Jurnal</span>
+        </button>
+      </div>
     </form>
   );
 };
