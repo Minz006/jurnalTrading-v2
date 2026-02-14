@@ -45,17 +45,14 @@ export const Auth: React.FC<AuthProps> = ({ onLogin }) => {
     setError('');
     setSuccessMsg('');
 
-    // Simulasi pengiriman email reset password
-    // (Di production, ini akan memanggil endpoint API untuk mengirim email sungguhan)
-    setTimeout(() => {
-      if (!email.includes('@')) {
-        setError('Format email tidak valid.');
+    try {
+        await ApiService.forgotPassword(email);
+        setSuccessMsg('Permintaan reset kata sandi telah dikirim ke Admin. Silakan hubungi admin untuk konfirmasi.');
+    } catch (err: any) {
+        setError(err.message || 'Gagal mengirim permintaan.');
+    } finally {
         setLoading(false);
-        return;
-      }
-      setSuccessMsg('Link reset kata sandi telah dikirim ke email Anda.');
-      setLoading(false);
-    }, 1500);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -113,7 +110,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin }) => {
           <p className="text-slate-500 dark:text-slate-400">
             {isRegister && 'Mulai perjalanan trading profesional Anda'}
             {isLogin && 'Selamat datang kembali, Trader!'}
-            {isForgot && 'Reset kata sandi Anda'}
+            {isForgot && 'Request Reset ke Admin'}
           </p>
         </div>
 
@@ -125,7 +122,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin }) => {
         )}
         {successMsg && (
           <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-500/50 text-green-600 dark:text-green-400 p-3 rounded-lg mb-6 text-sm text-center font-medium flex items-center justify-center gap-2">
-            <CheckCircle className="w-4 h-4" /> {successMsg}
+            <CheckCircle className="w-4 h-4 shrink-0" /> <span className="text-xs">{successMsg}</span>
           </div>
         )}
 
@@ -133,7 +130,7 @@ export const Auth: React.FC<AuthProps> = ({ onLogin }) => {
         {isForgot ? (
           <form onSubmit={handleForgotPassword} className="space-y-5 animate-fade-in-up">
             <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Masukkan Email Anda</label>
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Email Akun Anda</label>
               <div className="relative group">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-primary transition-colors" />
                 <input
@@ -145,13 +142,16 @@ export const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                   placeholder="nama@email.com"
                 />
               </div>
+              <p className="text-xs text-slate-400 mt-2 text-center">
+                  Password akan direset manual oleh admin.
+              </p>
             </div>
             <button
               type="submit"
               disabled={loading || !!successMsg}
               className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-500/30 transition-all flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              {loading ? <Loader2 className="animate-spin w-5 h-5" /> : 'Kirim Link Reset'}
+              {loading ? <Loader2 className="animate-spin w-5 h-5" /> : 'Request Reset'}
             </button>
             <button
               type="button"

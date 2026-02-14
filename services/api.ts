@@ -35,6 +35,24 @@ export const ApiService = {
     return data;
   },
 
+  forgotPassword: async (email: string): Promise<void> => {
+    const res = await fetch(`${API_URL}/auth?action=forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to request reset');
+  },
+
+  deleteAccount: async (): Promise<void> => {
+      const res = await fetch(`${API_URL}/auth?action=delete-account`, {
+          method: 'DELETE',
+          headers: ApiService.getHeaders()
+      });
+      if (!res.ok) throw new Error('Failed to delete account');
+  },
+
   // Trades
   getTrades: async (): Promise<Trade[]> => {
     const res = await fetch(`${API_URL}/trades`, {
@@ -66,5 +84,44 @@ export const ApiService = {
       headers: ApiService.getHeaders()
     });
     if (!res.ok) throw new Error('Failed to delete trade');
+  },
+
+  // Admin
+  adminLogin: async (password: string) => {
+    const res = await fetch(`${API_URL}/admin?action=login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Login admin gagal');
+    return data;
+  },
+
+  adminGetUsers: async (token: string) => {
+      const res = await fetch(`${API_URL}/admin`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+      });
+      return res.json();
+  },
+
+  adminResetPassword: async (token: string, userId: string) => {
+      const res = await fetch(`${API_URL}/admin?action=reset`, {
+          method: 'POST',
+          headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}` 
+            },
+          body: JSON.stringify({ userId })
+      });
+      return res.json();
+  },
+
+  adminDeleteUser: async (token: string, userId: string) => {
+      const res = await fetch(`${API_URL}/admin?action=delete&id=${userId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Gagal menghapus user');
   }
 };

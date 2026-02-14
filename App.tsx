@@ -3,15 +3,22 @@ import { Auth } from './components/Auth';
 import { Dashboard } from './components/Dashboard';
 import { TradeForm } from './components/TradeForm';
 import { TradeTable } from './components/TradeTable';
+import { AdminPanel } from './components/AdminPanel'; // Import Admin
 import { Card } from './components/ui/Card';
 import { ApiService } from './services/api';
 import { StorageService } from './services/storage';
 import { Trade, User, Statistics } from './types';
-import { LayoutGrid, List, LogOut, Wallet, Menu, X, PlusCircle, Moon, Sun } from 'lucide-react';
+import { LayoutGrid, List, LogOut, Wallet, Menu, X, PlusCircle, Trash2 } from 'lucide-react';
 
 type ViewState = 'dashboard' | 'input' | 'history';
 
 const App: React.FC = () => {
+  // Simple Router Logic
+  const pathname = window.location.pathname;
+  if (pathname === '/admin') {
+    return <AdminPanel />;
+  }
+
   const [user, setUser] = useState<User | null>(null);
   const [trades, setTrades] = useState<Trade[]>([]);
   const [loading, setLoading] = useState(true);
@@ -99,6 +106,22 @@ const App: React.FC = () => {
     setUser(null);
     setTrades([]);
     setActiveView('dashboard');
+  };
+
+  const handleDeleteAccount = async () => {
+      const confirmDelete = confirm("APAKAH ANDA YAKIN? Akun dan semua jurnal akan dihapus permanen. Email bisa digunakan kembali.");
+      if (confirmDelete) {
+          const secondConfirm = confirm("Tindakan ini tidak bisa dibatalkan.");
+          if (secondConfirm) {
+              try {
+                  await ApiService.deleteAccount();
+                  handleLogout();
+                  alert("Akun berhasil dihapus.");
+              } catch (e) {
+                  alert("Gagal menghapus akun.");
+              }
+          }
+      }
   };
 
   const handleAddTrade = async (tradeData: Trade) => {
@@ -208,13 +231,23 @@ const App: React.FC = () => {
               </div>
             </div>
           </div>
-          <button 
-            onClick={handleLogout}
-            className="w-full flex items-center justify-center space-x-2 bg-white dark:bg-slate-700 hover:bg-rose-50 dark:hover:bg-rose-900/30 text-slate-600 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400 py-2.5 rounded-lg transition-all border border-gray-200 dark:border-slate-600 hover:border-rose-200 dark:hover:border-rose-800 shadow-sm"
-          >
-            <LogOut className="w-4 h-4" />
-            <span className="text-sm font-medium">Keluar</span>
-          </button>
+          
+          <div className="space-y-2">
+            <button 
+                onClick={handleLogout}
+                className="w-full flex items-center justify-center space-x-2 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 py-2 rounded-lg transition-all border border-gray-200 dark:border-slate-600 shadow-sm text-xs font-medium"
+            >
+                <LogOut className="w-3 h-3" />
+                <span>Keluar</span>
+            </button>
+            <button 
+                onClick={handleDeleteAccount}
+                className="w-full flex items-center justify-center space-x-2 text-rose-500 hover:text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 py-1.5 rounded-lg transition-all text-xs opacity-70 hover:opacity-100"
+            >
+                <Trash2 className="w-3 h-3" />
+                <span>Hapus Akun</span>
+            </button>
+          </div>
         </div>
       </aside>
 
